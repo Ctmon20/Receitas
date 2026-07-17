@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Receitas</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #fdfaf7; margin: 0; padding: 0; color: #2d3436; }
+        .tela { display: none; padding: 20px; }
+        .ativo { display: block; }
+        
+        /* Botões */
+        button { 
+            background: #28a745; color: white; border: none; padding: 12px 25px; 
+            border-radius: 25px; cursor: pointer; font-weight: 600; 
+            transition: transform 0.2s, background 0.3s; 
+        }
+        button:hover { background: #218838; transform: scale(1.05); }
+
+        /* Estilo da Busca */
+        #campoBusca {
+            width: 90%; max-width: 500px; padding: 15px; border-radius: 30px; 
+            border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            display: block; margin: 0 auto 20px auto; outline: none;
+        }
+
+        /* Imagem de Capa */
+        .img-capa { width: 100%; height: 300px; object-fit: cover; border-radius: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+        
+        /* Botão Voltar */
+        .btn-voltar { 
+            position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.9); 
+            padding: 10px 15px; border-radius: 50%; cursor: pointer; font-size: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.3s; z-index: 10;
+        }
+
+        /* Cards do Menu */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 900px; margin: auto; }
+        .card { background: white; border-radius: 20px; padding: 15px; box-shadow: 0 6px 15px rgba(0,0,0,0.08); text-align: center; }
+        .card img { width: 100%; height: 200px; object-fit: cover; border-radius: 20px; margin-bottom: 10px; }
+
+        /* Meta Informações */
+        .meta-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
+        .info-box { background: white; padding: 15px; border-radius: 20px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; }
+        .info-box b { display: block; color: #28a745; font-size: 1.1em; margin-top: 5px; }
+
+        h3 { border-left: 4px solid #28a745; padding-left: 10px; }
+    </style>
+</head>
+<body>
+
+<!-- TELA 1: MENU -->
+<div id="telaMenu" class="tela ativo">
+    <h1 style="text-align:center;">Receitas</h1>
+    <input type="text" id="campoBusca" onkeyup="filtrar()" placeholder="Buscar receita...">
+    <div id="gridReceitas" class="grid"></div>
+    <div id="paginacao" style="text-align:center; margin-top:30px;"></div>
+</div>
+
+<!-- TELA 2: DETALHES -->
+<div id="telaDetalhes" class="tela">
+    <div style="position:relative;">
+        <div class="btn-voltar" onclick="irParaMenu()">&#8592;</div>
+        <img id="d-img" class="img-capa">
+    </div>
+    <h1 id="d-nome"></h1>
+    <div class="meta-info">
+        <div class="info-box">⏱️ Tempo<br><b><span id="d-temp"></span></b></div>
+        <div class="info-box">🔥 Dif.<br><b><span id="d-dif"></span></b></div>
+        <div class="info-box">👥 Porções<br><b><span id="d-porc"></span></b></div>
+    </div>
+    <h3>Ingredientes</h3>
+    <p id="d-ing" style="text-align:justify; line-height:1.6;"></p>
+    <h3>Modo de Preparo</h3>
+    <div id="d-prep"></div>
+</div>
+
+<script>
+    let todas = [];
+    let paginaAtual = 1;
+    const itensPorPagina = 6;
+    const URL = "https://script.google.com/macros/s/AKfycbxJvqMTa1JkZ60bppKHww6BsME8EaiU1sA2moVO0Dpxw-tDJzVFE2LKLCfC4bZQuE4i/exec"; // <--- COLE SEU URL AQUI
+
+    fetch(URL).then(r => r.json()).then(data => { todas = data; renderMenu(todas); });
+
+    function renderMenu(lista) {
+        const totalPaginas = Math.ceil(lista.length / itensPorPagina);
+        const inicio = (paginaAtual - 1) * itensPorPagina;
+        const final = inicio + itensPorPagina;
+        const exibidas = lista.slice(inicio, final);
+
+        document.getElementById('gridReceitas').innerHTML = exibidas.map(r => `
+            <div class="card">
+                <img src="${r.imagem}" onerror="this.src='https://via.placeholder.com/200'">
+                <h3>${r.nome}</h3>
+                <button onclick="abrirDetalhes(${JSON.stringify(r).replace(/"/g, '&quot;')})">Ver Receita</button>
+            </div>
+        `).join('');
+
+        // Paginação
+        let pagHtml = '';
+        for(let i=1; i<=totalPaginas; i++) {
+            pagHtml += `<button style="margin:5px; padding:5px 15px;" onclick="mudarPagina(${i})">${i}</button>`;
+        }
+        document.getElementById('paginacao').innerHTML = pagHtml;
+    }
+
+    function mudarPagina(p) { paginaAtual = p; renderMenu(todas); window.scrollTo(0,0); }
+
+    function abrirDetalhes(r) {
+        document.getElementById('d-img').src = r.imagem;
+        document.getElementById('d-nome').innerText = r.nome;
+        document.getElementById('d-dif').innerText = r.dificuldade;
+        document.getElementById('d-temp').innerText = r.tempo;
+        document.getElementById('d-porc').innerText = r.porcoes;
+        document.getElementById('d-ing').innerText = r.ingredientes;
+        
+        const passos = r.preparo.split('\n'); 
+        document.getElementById('d-prep').innerHTML = passos.map((passo, index) => `
+            <div style="display:flex; align-items:flex-start; background:white; padding:20px; border-radius:20px; margin-bottom:15px; box-shadow:0 5px 15px rgba(0,0,0,0.03);">
+                <div style="background:linear-gradient(135deg, #28a745, #20c997); color:white; width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-right:15px; flex-shrink:0; font-weight:bold;">${index + 1}</div>
+                <div style="line-height:1.6; color:#555;">${passo}</div>
+            </div>
+        `).join('');
+        
+        document.getElementById('telaMenu').classList.remove('ativo');
+        document.getElementById('telaDetalhes').classList.add('ativo');
+        window.scrollTo(0,0);
+    }
+
+    function irParaMenu() {
+        document.getElementById('telaDetalhes').classList.remove('ativo');
+        document.getElementById('telaMenu').classList.add('ativo');
+    }
+
+    function filtrar() {
+        const termo = document.getElementById('campoBusca').value.toLowerCase();
+        paginaAtual = 1;
+        renderMenu(todas.filter(r => r.nome.toLowerCase().includes(termo)));
+    }
+</script>
+</body>
+</html>
