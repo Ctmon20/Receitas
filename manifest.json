@@ -1,6 +1,6 @@
 {
   "name": "Minhas Receitas",
-  "short_name": "Receitas",
+  "short_name": "Saborly Receitas",
   "description": "Aplicativo de receitas culinárias",
   "start_url": "./",
   "display": "standalone",
