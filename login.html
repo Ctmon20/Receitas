@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Minhas Receitas</title>
+    <style>
+        /* Mantenha seu CSS original aqui */
+        :root { --primary: #28a745; --accent: #ff7675; --dark: #2d3436; --bg: #fdfaf7; --card-bg: white; --text: #2d3436; }
+        body.dark-mode { --bg: #1a1a1a; --card-bg: #2d2d2d; --text: #fdfaf7; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; transition: background 0.3s ease; }
+        .card { background: var(--card-bg); padding: 40px; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 100%; }
+        h1 { color: var(--primary); margin-bottom: 25px; }
+        input { width: 100%; padding: 15px; margin-bottom: 15px; border: 2px solid #dfe6e9; border-radius: 15px; box-sizing: border-box; background: transparent; color: var(--text); }
+        .btn { width: 100%; padding: 15px; border-radius: 50px; border: none; background: var(--primary); color: white; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .btn:hover { background: #218838; }
+        #btn-tema { position: absolute; top: 20px; right: 20px; padding: 10px 20px; border-radius: 20px; cursor: pointer; background: var(--primary); color: white; border: none; font-weight: bold; }
+        /* Adicionado estilo para a mensagem de erro */
+        #mensagem-erro { margin-top: 15px; color: var(--accent); font-weight: bold; font-size: 0.9em; display: none; }
+    </style>
+</head>
+<body>
+
+<button id="btn-tema" onclick="alternarTema()">🌙 Alternar Tema</button>
+
+<div class="card">
+    <h1>Login</h1>
+    <p>Acesse sua conta para ver suas receitas.</p>
+    
+    <!-- IDs ajustados para bater com o app.js -->
+    <input type="text" id="login-username" placeholder="Usuário">
+    <input type="password" id="login-password" placeholder="Sua senha">
+    
+    <button class="btn" id="btn-submit" onclick="executeLogin(event)">ENTRAR</button>
+    
+    <!-- Local para exibir o erro -->
+    <p id="mensagem-erro"></p>
+    
+    <p style="margin-top: 20px; font-size: 0.9em;">
+        Não tem conta? <a href="index.html" style="color: var(--primary); text-decoration: none; font-weight: bold;">Assine agora</a>
+    </p>
+</div>
+
+<!-- O app.js DEVE ser carregado aqui para o objeto 'db' existir -->
+<script src="app.js"></script>
+
+<script>
+    async function executeLogin(e) {
+        e.preventDefault();
+        const btnSubmit = document.getElementById('btn-submit');
+        const msgErro = document.getElementById('mensagem-erro');
+        const usernameInput = document.getElementById('login-username').value;
+        const passwordInput = document.getElementById('login-password').value;
+
+        msgErro.style.display = "none";
+        btnSubmit.disabled = true;
+        btnSubmit.innerText = "VALIDANDO...";
+
+        const result = await db.call({
+            action: "login",
+            username: usernameInput,
+            password: passwordInput
+        });
+
+        if (result && result.success) {
+            localStorage.setItem('receitas_session', result.nome);
+            // Redirecionamento mantendo a estrutura solicitada
+            window.location.href = 'pago.html';
+        } else {
+            msgErro.innerText = result ? result.message : "Erro ao contatar servidor.";
+            msgErro.style.display = "block";
+            btnSubmit.disabled = false;
+            btnSubmit.innerText = "ENTRAR";
+        }
+    }
+
+    // Lógica de tema mantida conforme sua estrutura
+    document.body.classList.add('dark-mode');
+    function alternarTema() {
+        document.body.classList.toggle('dark-mode');
+        const btn = document.getElementById('btn-tema');
+        btn.innerText = document.body.classList.contains('dark-mode') ? '☀️ Modo Claro' : '🌙 Modo Escuro';
+    }
+</script>
+</body>
+</html>
