@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#28a745">
+    <link rel="apple-touch-icon" href="logo-192.png">
+
+    <title>Premium - Minhas Receitas</title>
+    <style>
+        :root {
+            --primary: #28a745;
+            --accent: #ff7675;
+            --dark: #2d3436;
+            --bg: #fdfaf7;
+            --card-bg: white;
+            --text: #2d3436;
+            --premium-bg: #fff8f8;
+        }
+
+        /* Tema Escuro */
+        body.dark-mode {
+            --bg: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text: #fdfaf7;
+            --premium-bg: #3d3333;
+        }
+
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: var(--bg); 
+            margin: 0; padding: 20px; color: var(--text);
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            transition: background 0.3s ease;
+        }
+
+        .card { 
+            background: var(--card-bg); padding: 40px; border-radius: 30px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15); 
+            text-align: center; max-width: 450px; width: 100%;
+        }
+
+        h1 { color: var(--primary); font-size: 2em; margin-bottom: 10px; }
+        
+        .destaque-premium {
+            background: var(--premium-bg); border: 2px solid var(--accent);
+            padding: 20px; border-radius: 20px; margin: 20px 0;
+        }
+
+        ul { text-align: left; list-style: none; padding: 0; margin: 20px 0; }
+        li { margin-bottom: 10px; display: flex; align-items: center; }
+        li::before { content: "✓"; color: var(--primary); font-weight: bold; margin-right: 10px; }
+
+        .btn {
+            display: block; width: 100%; padding: 15px; border-radius: 50px;
+            font-weight: 700; cursor: pointer; text-decoration: none;
+            transition: all 0.3s ease; border: none; margin-bottom: 15px;
+        }
+
+        .btn-gratis { background: #636e72; color: white; }
+        .btn-pago { background: var(--accent); color: white; box-shadow: 0 4px 15px rgba(225, 112, 85, 0.4); }
+        
+        .login-link { font-size: 0.9em; color: #636e72; margin-top: 15px; }
+        .login-link a { color: var(--primary); font-weight: bold; text-decoration: none; }
+        .preco { font-size: 2.2em; font-weight: bold; color: var(--accent); }
+
+        /* Botão Tema */
+        #btn-tema {
+            position: absolute; top: 20px; right: 20px;
+            padding: 10px 20px; border-radius: 20px; cursor: pointer;
+            background: var(--primary); color: white; border: none; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<button id="btn-tema" onclick="alternarTema()">🌙 Alternar Tema</button>
+
+<div class="card">
+    <h1>Bem-vindo ao Receitas! 🍳</h1>
+    <p>Escolha o seu plano para começar:</p>
+
+    <div class="destaque-premium">
+        <p style="margin:0; font-weight:bold;">Acesso Premium</p>
+        <div class="preco">R$ 9,90<span style="font-size: 0.3em;">/mês</span></div>
+        <ul>
+            <li>Receitas ilimitadas</li>
+            <li>Tendências gastronômicas diárias</li>
+            <li>Sem anúncios</li>
+            <li>Prioridade no suporte</li>
+            <li>Cancele não pagando o próximo mês</li>
+        </ul>
+        
+        <button class="btn btn-pago" onclick="window.open('https://mpago.la/1itdQs6', '_blank')">
+            PAGAR AGORA
+        </button>
+        
+        <!-- Texto do suporte -->
+        <p style="margin-top: 20px; font-size: 0.85em; text-align: center;">
+            Após o pagamento, entre em contato para liberar seu acesso:<br>
+            <a href="https://t.me/SGEEstoqly" target="_blank" style="color: var(--primary); font-weight: bold; text-decoration: none; font-size: 1.1em;">
+                Telegram: @SGEEstoqly
+                /Telefone: (82)9 8860-5068
+            </a>
+        </p>
+    </div>
+
+    <button class="btn btn-gratis" onclick="window.location.href='gratuito.html'">
+        Continuar no modo gratuito
+    </button>
+    
+    <p style="font-size: 0.85em; color: #b2bec3; margin-bottom: 5px;">*Acesso limitado a <b>6 receitas</b>.</p>
+
+    <div class="login-link">
+        Já é um assinante? <a href="login.html">Entre aqui e faça login</a>
+    </div>
+</div>
+
+<script>
+    // Aplica o modo escuro ao carregar a página
+    document.body.classList.add('dark-mode');
+    
+    // Atualiza o texto do botão para o estado inicial correto
+    const btn = document.getElementById('btn-tema');
+    if(btn) {
+        btn.innerText = '☀️ Modo Claro';
+    }
+
+    function alternarTema() {
+        document.body.classList.toggle('dark-mode');
+        const btn = document.getElementById('btn-tema');
+        btn.innerText = document.body.classList.contains('dark-mode') ? '☀️ Modo Claro' : '🌙 Modo Escuro';
+    }
+
+    if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+}
+
+</script>
+
+</body>
+</html>
