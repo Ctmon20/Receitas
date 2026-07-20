@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Saborly Receitas</title>
+    <style>
+        :root { --primary: #28a745; --accent: #ff7675; --dark: #2d3436; --bg: #fdfaf7; --card-bg: white; --text: #2d3436; }
+        body.dark-mode { --bg: #1a1a1a; --card-bg: #2d2d2d; --text: #fdfaf7; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--text); display: flex; justify-content: center; align-items: center; min-height: 100vh; transition: background 0.3s ease; }
+        .card { background: var(--card-bg); padding: 40px; border-radius: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 100%; position: relative; }
+        h1 { color: var(--primary); margin-bottom: 25px; }
+        input { width: 100%; padding: 15px; margin-bottom: 15px; border: 2px solid #dfe6e9; border-radius: 15px; box-sizing: border-box; background: transparent; color: var(--text); }
+        .btn { width: 100%; padding: 15px; border-radius: 50px; border: none; background: var(--primary); color: white; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .btn:hover { background: #218838; }
+        #btn-tema { position: absolute; top: 20px; right: 20px; width: 42px; height: 42px; border-radius: 50%; cursor: pointer; background: var(--primary); color: white; border: none; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+        #mensagem-erro { margin-top: 15px; color: var(--accent); font-weight: bold; font-size: 0.9em; display: none; }
+        .card { position: relative; }
+        .logo { width: 110px; display: block; margin: 0 auto 20px; }
+        #modal-inativo { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; align-items: center; justify-content: center; }
+        .box-modal { background: var(--card-bg); padding: 30px; border-radius: 20px; text-align: center; color: var(--text); max-width: 300px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <button id="btn-tema" onclick="alternarTema()">🌙</button>
+    <img src="logo.png" class="logo" alt="Logo">
+    <h1>Saborly Receitas</h1>
+    <p>Acesse sua conta para ver suas receitas.</p>
+    <input type="text" id="login-username" placeholder="Usuário">
+    <input type="password" id="login-password" placeholder="Sua senha">
+    <button class="btn" id="btn-submit" onclick="executeLogin(event)">ENTRAR</button>
+    <p id="mensagem-erro"></p>
+    <p style="margin-top:20px;font-size:.9em;">
+        Não tem conta?
+        <a href="index.html" style="color:var(--primary);text-decoration:none;font-weight:bold;">Assine agora</a>
+    </p>
+</div>
+
+<div id="modal-inativo">
+    <div class="box-modal">
+        <h3>Atenção</h3>
+        <p>Seu acesso está inativo. Regularize seu pagamento.</p>
+        <button class="btn" onclick="document.getElementById('modal-inativo').style.display='none'">ENTENDI</button>
+    </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+    async function executeLogin(e) {
+        e.preventDefault();
+        const btnSubmit = document.getElementById('btn-submit');
+        const msgErro = document.getElementById('mensagem-erro');
+        const usernameInput = document.getElementById('login-username').value;
+        const passwordInput = document.getElementById('login-password').value;
+
+        msgErro.style.display = "none";
+        btnSubmit.disabled = true;
+        btnSubmit.innerText = "VALIDANDO...";
+
+        const result = await db.call({
+            action: "login",
+            username: usernameInput,
+            password: passwordInput
+        });
+
+        // Debug: Veja no console (F12) o que o servidor está enviando exatamente
+        console.log("Resposta do Servidor:", result);
+
+        if (result && result.success) {
+            // Captura o status da coluna C (que nomeamos como 'status' no AppScript)
+            // Se a chave no AppScript for 'perfil', use result.perfil aqui
+            const statusVindoDoServidor = result.status || result.perfil || "";
+            const statusFormatado = statusVindoDoServidor.toString().trim().toLowerCase();
+            
+            console.log("Status detectado:", statusFormatado);
+
+            if (statusFormatado !== "ativo") {
+                document.getElementById('modal-inativo').style.display = "flex";
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "ENTRAR";
+            } else {
+                localStorage.setItem('receitas_session', result.nome);
+                localStorage.setItem('login_time', new Date().getTime());
+                // Limpeza preventiva de chaves antigas que possam estar bloqueando o login
+                localStorage.removeItem('sge_plano_status');
+                window.location.href = 'pago.html';
+            }
+        } else {
+            msgErro.innerText = result ? result.message : "Usuário ou senha incorretos.";
+            msgErro.style.display = "block";
+            btnSubmit.disabled = false;
+            btnSubmit.innerText = "ENTRAR";
+        }
+    }
+
+    document.body.classList.add('dark-mode');
+    function alternarTema() {
+        document.body.classList.toggle('dark-mode');
+        const btn = document.getElementById('btn-tema');
+        btn.innerText = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+    }
+</script>
+</body>
+</html>
