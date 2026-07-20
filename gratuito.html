@@ -106,7 +106,7 @@
         .then(r => r.json())
         .then(data => {
             const lista = data.receitas || []; 
-            const limitadas = lista.slice(0, 6);
+            const limitadas = lista.slice(0, 9);
             renderMenu(limitadas);
         });
 
